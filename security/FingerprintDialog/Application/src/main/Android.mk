@@ -26,4 +26,5 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
 LOCAL_AAPT_FLAGS := --auto-add-overlay \
     --extra-packages android.support.v7.appcompat
 
+LOCAL_SDK_VERSION := current
 include $(BUILD_PACKAGE)
