@@ -20,25 +20,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.wearable.activity.WearableActivity;
+import android.support.v4.app.FragmentActivity;
+import android.support.wear.ambient.AmbientModeSupport;
+import android.support.wearable.phone.PhoneDeviceType;
 import android.support.wearable.view.ConfirmationOverlay;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.CapabilityApi;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.wearable.intent.RemoteIntent;
-import com.google.android.wearable.playstore.PlayStoreAvailability;
 
 import java.util.Set;
 
@@ -46,10 +43,9 @@ import java.util.Set;
  * Checks if the phone app is installed on remote device. If it is not, allows user to open app
  * listing on the phone's Play or App Store.
  */
-public class MainWearActivity extends WearableActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        CapabilityApi.CapabilityListener {
+public class MainWearActivity extends FragmentActivity implements
+        AmbientModeSupport.AmbientCallbackProvider,
+        CapabilityClient.OnCapabilityChangedListener {
 
     private static final String TAG = "MainWearActivity";
 
@@ -74,7 +70,7 @@ public class MainWearActivity extends WearableActivity implements
 
     // Links to install mobile app for both Android (Play Store) and iOS.
     // TODO: Replace with your links/packages.
-    private static final String PLAY_STORE_APP_URI =
+    private static final String ANDROID_MARKET_APP_URI =
             "market://details?id=com.example.android.wearable.wear.wearverifyremoteapp";
 
     // TODO: Replace with your links/packages.
@@ -105,18 +101,18 @@ public class MainWearActivity extends WearableActivity implements
 
     private Node mAndroidPhoneNodeWithApp;
 
-    private GoogleApiClient mGoogleApiClient;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        setAmbientEnabled();
 
-        mInformationTextView = (TextView) findViewById(R.id.information_text_view);
-        mRemoteOpenButton = (Button) findViewById(R.id.remote_open_button);
+        // Enables Ambient mode.
+        AmbientModeSupport.attach(this);
+
+        mInformationTextView = findViewById(R.id.information_text_view);
+        mRemoteOpenButton = findViewById(R.id.remote_open_button);
 
         mInformationTextView.setText(CHECKING_MESSAGE);
 
@@ -126,12 +122,6 @@ public class MainWearActivity extends WearableActivity implements
                 openAppInStoreOnPhone();
             }
         });
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
     }
 
 
@@ -140,46 +130,17 @@ public class MainWearActivity extends WearableActivity implements
         Log.d(TAG, "onPause()");
         super.onPause();
 
-        if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
-            Wearable.CapabilityApi.removeCapabilityListener(
-                    mGoogleApiClient,
-                    this,
-                    CAPABILITY_PHONE_APP);
-
-            mGoogleApiClient.disconnect();
-        }
+        Wearable.getCapabilityClient(this).removeListener(this, CAPABILITY_PHONE_APP);
     }
 
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume()");
         super.onResume();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
-    }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "onConnected()");
-
-        // Set up listeners for capability changes (install/uninstall of remote app).
-        Wearable.CapabilityApi.addCapabilityListener(
-                mGoogleApiClient,
-                this,
-                CAPABILITY_PHONE_APP);
+        Wearable.getCapabilityClient(this).addListener(this, CAPABILITY_PHONE_APP);
 
         checkIfPhoneHasApp();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "onConnectionSuspended(): connection to location client suspended: " + i);
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "onConnectionFailed(): " + connectionResult);
     }
 
     /*
@@ -195,26 +156,23 @@ public class MainWearActivity extends WearableActivity implements
     private void checkIfPhoneHasApp() {
         Log.d(TAG, "checkIfPhoneHasApp()");
 
-        PendingResult<CapabilityApi.GetCapabilityResult> pendingResult =
-                Wearable.CapabilityApi.getCapability(
-                        mGoogleApiClient,
-                        CAPABILITY_PHONE_APP,
-                        CapabilityApi.FILTER_ALL);
+        Task<CapabilityInfo> capabilityInfoTask = Wearable.getCapabilityClient(this)
+                .getCapability(CAPABILITY_PHONE_APP, CapabilityClient.FILTER_ALL);
 
-        pendingResult.setResultCallback(new ResultCallback<CapabilityApi.GetCapabilityResult>() {
-
+        capabilityInfoTask.addOnCompleteListener(new OnCompleteListener<CapabilityInfo>() {
             @Override
-            public void onResult(@NonNull CapabilityApi.GetCapabilityResult getCapabilityResult) {
-                Log.d(TAG, "onResult(): " + getCapabilityResult);
+            public void onComplete(Task<CapabilityInfo> task) {
 
-                if (getCapabilityResult.getStatus().isSuccess()) {
-                    CapabilityInfo capabilityInfo = getCapabilityResult.getCapability();
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "Capability request succeeded.");
+                    CapabilityInfo capabilityInfo = task.getResult();
                     mAndroidPhoneNodeWithApp = pickBestNodeId(capabilityInfo.getNodes());
-                    verifyNodeAndUpdateUI();
 
                 } else {
-                    Log.d(TAG, "Failed CapabilityApi: " + getCapabilityResult.getStatus());
+                    Log.d(TAG, "Capability request failed to return any results.");
                 }
+
+                verifyNodeAndUpdateUI();
             }
         });
     }
@@ -242,20 +200,16 @@ public class MainWearActivity extends WearableActivity implements
     private void openAppInStoreOnPhone() {
         Log.d(TAG, "openAppInStoreOnPhone()");
 
-        int playStoreAvailabilityOnPhone =
-                PlayStoreAvailability.getPlayStoreAvailabilityOnPhone(getApplicationContext());
-
-        switch (playStoreAvailabilityOnPhone) {
-
-            // Android phone with the Play Store.
-            case PlayStoreAvailability.PLAY_STORE_ON_PHONE_AVAILABLE:
-                Log.d(TAG, "\tPLAY_STORE_ON_PHONE_AVAILABLE");
-
+        int phoneDeviceType = PhoneDeviceType.getPhoneDeviceType(getApplicationContext());
+        switch (phoneDeviceType) {
+            // Paired to Android phone, use Play Store URI.
+            case PhoneDeviceType.DEVICE_TYPE_ANDROID:
+                Log.d(TAG, "\tDEVICE_TYPE_ANDROID");
                 // Create Remote Intent to open Play Store listing of app on remote device.
                 Intent intentAndroid =
                         new Intent(Intent.ACTION_VIEW)
                                 .addCategory(Intent.CATEGORY_BROWSABLE)
-                                .setData(Uri.parse(PLAY_STORE_APP_URI));
+                                .setData(Uri.parse(ANDROID_MARKET_APP_URI));
 
                 RemoteIntent.startRemoteActivity(
                         getApplicationContext(),
@@ -263,9 +217,9 @@ public class MainWearActivity extends WearableActivity implements
                         mResultReceiver);
                 break;
 
-            // Assume iPhone (iOS device) or Android without Play Store (not supported right now).
-            case PlayStoreAvailability.PLAY_STORE_ON_PHONE_UNAVAILABLE:
-                Log.d(TAG, "\tPLAY_STORE_ON_PHONE_UNAVAILABLE");
+            // Paired to iPhone, use iTunes App Store URI
+            case PhoneDeviceType.DEVICE_TYPE_IOS:
+                Log.d(TAG, "\tDEVICE_TYPE_IOS");
 
                 // Create Remote Intent to open App Store listing of app on iPhone.
                 Intent intentIOS =
@@ -279,8 +233,8 @@ public class MainWearActivity extends WearableActivity implements
                         mResultReceiver);
                 break;
 
-            case PlayStoreAvailability.PLAY_STORE_ON_PHONE_ERROR_UNKNOWN:
-                Log.d(TAG, "\tPLAY_STORE_ON_PHONE_ERROR_UNKNOWN");
+            case PhoneDeviceType.DEVICE_TYPE_ERROR_UNKNOWN:
+                Log.d(TAG, "\tDEVICE_TYPE_ERROR_UNKNOWN");
                 break;
         }
     }
@@ -298,5 +252,30 @@ public class MainWearActivity extends WearableActivity implements
             bestNodeId = node;
         }
         return bestNodeId;
+    }
+
+    @Override
+    public AmbientModeSupport.AmbientCallback getAmbientCallback() {
+        return new MyAmbientCallback();
+    }
+
+    private class MyAmbientCallback extends AmbientModeSupport.AmbientCallback {
+        /** Prepares the UI for ambient mode. */
+        @Override
+        public void onEnterAmbient(Bundle ambientDetails) {
+            super.onEnterAmbient(ambientDetails);
+
+            Log.d(TAG, "onEnterAmbient() " + ambientDetails);
+            // In our case, the assets are already in black and white, so we don't update UI.
+        }
+
+        /** Restores the UI to active (non-ambient) mode. */
+        @Override
+        public void onExitAmbient() {
+            super.onExitAmbient();
+
+            Log.d(TAG, "onExitAmbient()");
+            // In our case, the assets are already in black and white, so we don't update UI.
+        }
     }
 }

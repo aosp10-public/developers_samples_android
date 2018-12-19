@@ -19,6 +19,7 @@ package com.example.android.wearable.speaker;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -26,12 +27,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
-import android.support.wearable.activity.WearableActivity;
+import android.support.wear.ambient.AmbientModeSupport;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.concurrent.TimeUnit;
@@ -42,7 +45,9 @@ import java.util.concurrent.TimeUnit;
  * to 10 seconds), a Play icon (if clicked, it wil playback the recorded audio file) and a music
  * note icon (if clicked, it plays an MP3 file that is included in the app).
  */
-public class MainActivity extends WearableActivity implements UIAnimation.UIStateListener,
+public class MainActivity extends FragmentActivity implements
+        AmbientModeSupport.AmbientCallbackProvider,
+        UIAnimation.UIStateListener,
         SoundRecorder.OnVoicePlaybackStateChangedListener {
 
     private static final String TAG = "MainActivity";
@@ -50,14 +55,24 @@ public class MainActivity extends WearableActivity implements UIAnimation.UIStat
     private static final long COUNT_DOWN_MS = TimeUnit.SECONDS.toMillis(10);
     private static final long MILLIS_IN_SECOND = TimeUnit.SECONDS.toMillis(1);
     private static final String VOICE_FILE_NAME = "audiorecord.pcm";
+
     private MediaPlayer mMediaPlayer;
     private AppState mState = AppState.READY;
     private UIAnimation.UIState mUiState = UIAnimation.UIState.HOME;
     private SoundRecorder mSoundRecorder;
 
+    private RelativeLayout mOuterCircle;
+    private View mInnerCircle;
+
     private UIAnimation mUIAnimation;
     private ProgressBar mProgressBar;
     private CountDownTimer mCountDownTimer;
+
+    /**
+     * Ambient mode controller attached to this display. Used by Activity to see if it is in
+     * ambient mode.
+     */
+    private AmbientModeSupport.AmbientController mAmbientController;
 
     enum AppState {
         READY, PLAYING_VOICE, PLAYING_MUSIC, RECORDING
@@ -67,9 +82,14 @@ public class MainActivity extends WearableActivity implements UIAnimation.UIStat
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        mProgressBar = (ProgressBar) findViewById(R.id.progress);
-        mProgressBar.setMax((int) (COUNT_DOWN_MS / MILLIS_IN_SECOND));
-        setAmbientEnabled();
+
+        mOuterCircle = findViewById(R.id.outer_circle);
+        mInnerCircle = findViewById(R.id.inner_circle);
+
+        mProgressBar = findViewById(R.id.progress_bar);
+
+        // Enables Ambient mode.
+        mAmbientController = AmbientModeSupport.attach(this);
     }
 
     private void setProgressBar(long progressInMillis) {
@@ -219,10 +239,10 @@ public class MainActivity extends WearableActivity implements UIAnimation.UIStat
         int[] thumbResources = new int[] {R.id.mic, R.id.play, R.id.music};
         ImageView[] thumbs = new ImageView[3];
         for(int i=0; i < 3; i++) {
-            thumbs[i] = (ImageView) findViewById(thumbResources[i]);
+            thumbs[i] = findViewById(thumbResources[i]);
         }
         View containerView = findViewById(R.id.container);
-        ImageView expandedView = (ImageView) findViewById(R.id.expanded);
+        ImageView expandedView = findViewById(R.id.expanded);
         int animationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mUIAnimation = new UIAnimation(containerView, thumbs, expandedView, animationDuration,
                 this);
@@ -234,7 +254,7 @@ public class MainActivity extends WearableActivity implements UIAnimation.UIStat
         if (speakerIsSupported()) {
             checkPermissions();
         } else {
-            findViewById(R.id.container2).setOnClickListener(new View.OnClickListener() {
+            mOuterCircle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(MainActivity.this, R.string.no_speaker_supported,
@@ -289,5 +309,57 @@ public class MainActivity extends WearableActivity implements UIAnimation.UIStat
             }
         }
         return false;
+    }
+
+    @Override
+    public AmbientModeSupport.AmbientCallback getAmbientCallback() {
+        return new MyAmbientCallback();
+    }
+
+    private class MyAmbientCallback extends AmbientModeSupport.AmbientCallback {
+        /** Prepares the UI for ambient mode. */
+        @Override
+        public void onEnterAmbient(Bundle ambientDetails) {
+            super.onEnterAmbient(ambientDetails);
+
+            Log.d(TAG, "onEnterAmbient() " + ambientDetails);
+
+            // Changes views to grey scale.
+            Context context = getApplicationContext();
+            Resources resources = context.getResources();
+
+            mOuterCircle.setBackgroundColor(
+                    ContextCompat.getColor(context, R.color.light_grey));
+            mInnerCircle.setBackground(
+                    ContextCompat.getDrawable(context, R.drawable.grey_circle));
+
+            mProgressBar.setProgressTintList(
+                    resources.getColorStateList(R.color.white, context.getTheme()));
+            mProgressBar.setProgressBackgroundTintList(
+                    resources.getColorStateList(R.color.black, context.getTheme()));
+        }
+
+        /** Restores the UI to active (non-ambient) mode. */
+        @Override
+        public void onExitAmbient() {
+            super.onExitAmbient();
+
+            Log.d(TAG, "onExitAmbient()");
+
+            // Changes views to color.
+            Context context = getApplicationContext();
+            Resources resources = context.getResources();
+
+            mOuterCircle.setBackgroundColor(
+                    ContextCompat.getColor(context, R.color.background_color));
+            mInnerCircle.setBackground(
+                    ContextCompat.getDrawable(context, R.drawable.color_circle));
+
+            mProgressBar.setProgressTintList(
+                    resources.getColorStateList(R.color.progressbar_tint, context.getTheme()));
+            mProgressBar.setProgressBackgroundTintList(
+                    resources.getColorStateList(
+                            R.color.progressbar_background_tint, context.getTheme()));
+        }
     }
 }
