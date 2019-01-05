@@ -1,10 +1,16 @@
+Warning: This sample is currently outdated and you should reference the Java version instead.
+============================================================================================
 
-Android AutofillFramework Sample
-===================================
+Android AutofillFramework Sample (Kotlin)
+=========================================
 
 This sample demonstrates the use of the Autofill Framework. It includes implementations of client
 Activities with views that should be autofilled, and a Service that can provide autofill data to
 client Activities.
+
+Maintainer's Note
+------------------
+**IMPORTANT:** The Kotlin version of this sample is temporarily out of date. Until this is corrected, you should reference the Java version instead.
 
 Introduction
 ------------
@@ -72,14 +78,14 @@ order to provide this view hierarchy data to the Autofill service.
 override fun onProvideAutofillVirtualStructure(structure: ViewStructure, flags: Int) {
     // Build a ViewStructure to pack in AutoFillService requests.
     structure.setClassName(javaClass.name)
-    val childrenSize = mItems.size()
+    val childrenSize = items.size()
     Log.d(TAG, "onProvideAutofillVirtualStructure(): flags = " + flags + ", items = "
             + childrenSize + ", extras: " + bundleToString(structure.extras))
     var index = structure.addChildCount(childrenSize)
     // Traverse through the view hierarchy, including virtual child views. For each view, we
     // need to set the relevant autofill metadata and add it to the ViewStructure.
     for (i in 0..childrenSize - 1) {
-        val item = mItems.valueAt(i)
+        val item = items.valueAt(i)
         Log.d(TAG, "Adding new child at index $index: $item")
         val child = structure.newChild(index)
         child.setAutofillId(structure, item.id)
@@ -113,7 +119,7 @@ override fun autofill(values: SparseArray<AutofillValue>) {
     for (i in 0..values.size() - 1) {
         val id = values.keyAt(i)
         val value = values.valueAt(i)
-        mItems[id]?.let { item ->
+        items[id]?.let { item ->
             if (item.editable) {
                 // Set the item's text to the text wrapped in the AutofillValue.
                 item.text = value.textValue
@@ -138,7 +144,7 @@ Pre-requisites
 Screenshots
 -------------
 
-<img src="screenshots/1_HomePage.png" height="400" alt="Screenshot"/> <img src="screenshots/2_StandardViewAutofillable.png" height="400" alt="Screenshot"/> <img src="screenshots/3_StandardViewAutofilled.png" height="400" alt="Screenshot"/> <img src="screenshots/4_WelcomeActivity.png" height="400" alt="Screenshot"/> <img src="screenshots/5_CustomViewAutofillable.png" height="400" alt="Screenshot"/> <img src="screenshots/6_CustomViewAutofilled.png" height="400" alt="Screenshot"/> <img src="screenshots/7_SettingsActivity.png" height="400" alt="Screenshot"/> <img src="screenshots/8_AuthNeeded.png" height="400" alt="Screenshot"/> <img src="screenshots/9_AuthActivity.png" height="400" alt="Screenshot"/> 
+<img src="screenshots/1_MainPage.png" height="400" alt="Screenshot"/> <img src="screenshots/2_SampleLoginEditTexts.png" height="400" alt="Screenshot"/> <img src="screenshots/3_SampleLoginEditTextsAutofilled.png" height="400" alt="Screenshot"/> <img src="screenshots/4_WelcomeActivity.png" height="400" alt="Screenshot"/> <img src="screenshots/5_SampleLoginCustomVirtualView.png" height="400" alt="Screenshot"/> <img src="screenshots/6_SampleLoginCustomVirtualViewAutofilled.png" height="400" alt="Screenshot"/> <img src="screenshots/7_SampleCheckOutSpinnersAutofillable.png" height="400" alt="Screenshot"/> <img src="screenshots/8_SampleCheckOutSpinnersAutofilled.png" height="400" alt="Screenshot"/> <img src="screenshots/9_SettingsActivity.png" height="400" alt="Screenshot"/> <img src="screenshots/10_AuthNeeded.png" height="400" alt="Screenshot"/> <img src="screenshots/11_AuthActivity.png" height="400" alt="Screenshot"/> 
 
 Getting Started
 ---------------
