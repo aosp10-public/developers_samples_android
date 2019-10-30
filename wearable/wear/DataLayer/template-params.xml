@@ -20,8 +20,26 @@
     <package>com.example.android.wearable.datalayer</package>
 
     <minSdk>18</minSdk>
-    <targetSdkVersion>25</targetSdkVersion>
-    <targetSdkVersionWear>25</targetSdkVersionWear>
+
+    <minSdkVersionWear>23</minSdkVersionWear>
+
+    <multiDexEnabled>true</multiDexEnabled>
+
+    <androidX>true</androidX>
+
+    <dependency>androidx.legacy:legacy-support-v4:1.0.0</dependency>
+    <dependency>androidx.legacy:legacy-support-v13:1.0.0</dependency>
+
+    <dependency>androidx.cardview:cardview:1.0.0</dependency>
+    <dependency>androidx.appcompat:appcompat:1.0.2</dependency>
+    <dependency>androidx.recyclerview:recyclerview:1.0.0</dependency>
+    <dependency>androidx.percentlayout:percentlayout:1.0.0</dependency>
+
+    <dependency_wearable>androidx.wear:wear:1.0.0</dependency_wearable>
+    <dependency_wearable>androidx.recyclerview:recyclerview:1.0.0</dependency_wearable>
+    <dependency_wearable>androidx.percentlayout:percentlayout:1.0.0</dependency_wearable>
+    <dependency_wearable>androidx.legacy:legacy-support-v13:1.0.0</dependency_wearable>
+
 
     <wearable>
         <has_handheld_app>true</has_handheld_app>
@@ -63,7 +81,7 @@ to produce and consume DataEvents and effectively work with the DataLayer.
         </description>
         <intro>
 <![CDATA[
-This sample demonstrates how to make a handheld and an Android Wear device communicate
+This sample demonstrates how to make a handheld and an Wear device communicate
 using the [DataApi][2].
 It does this by sending a picture between connected devices.
 

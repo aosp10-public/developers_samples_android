@@ -24,6 +24,7 @@ import android.content.IntentSender
 import android.os.Bundle
 import android.service.autofill.Dataset
 import android.service.autofill.FillResponse
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.autofill.AutofillManager.EXTRA_ASSIST_STRUCTURE
 import android.view.autofill.AutofillManager.EXTRA_AUTHENTICATION_RESULT
@@ -43,9 +44,9 @@ import kotlinx.android.synthetic.main.multidataset_service_auth_activity.master_
  * It is launched when an Autofill Response or specific Dataset within the Response requires
  * authentication to access. It bundles the result in an Intent.
  */
-class AuthActivity : Activity() {
+class AuthActivity : AppCompatActivity() {
 
-    private var mReplyIntent: Intent? = null
+    private var replyIntent: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,8 +70,8 @@ class AuthActivity : Activity() {
     }
 
     override fun finish() {
-        if (mReplyIntent != null) {
-            setResult(Activity.RESULT_OK, mReplyIntent)
+        if (replyIntent != null) {
+            setResult(Activity.RESULT_OK, replyIntent)
         } else {
             setResult(Activity.RESULT_CANCELED)
         }
@@ -79,7 +80,7 @@ class AuthActivity : Activity() {
 
     private fun onFailure() {
         Log.w(TAG, "Failed auth.")
-        mReplyIntent = null
+        replyIntent = null
     }
 
     private fun onSuccess() {
@@ -89,9 +90,9 @@ class AuthActivity : Activity() {
         val parser = StructureParser(structure)
         parser.parseForFill()
         val autofillFields = parser.autofillFields
-        mReplyIntent = Intent()
+        replyIntent = Intent()
         val clientFormDataMap = SharedPrefsAutofillRepository
-                .getClientFormData(this, autofillFields.focusedAutofillHints, autofillFields.allAutofillHints)
+                .getFilledAutofillFieldCollection(this, autofillFields.focusedAutofillHints, autofillFields.allAutofillHints)
         if (forResponse) {
             AutofillHelper.newResponse(this, false, autofillFields, clientFormDataMap)?.let(this::setResponseIntent)
         } else {
@@ -105,11 +106,11 @@ class AuthActivity : Activity() {
     }
 
     private fun setResponseIntent(fillResponse: FillResponse) {
-        mReplyIntent?.putExtra(EXTRA_AUTHENTICATION_RESULT, fillResponse)
+        replyIntent?.putExtra(EXTRA_AUTHENTICATION_RESULT, fillResponse)
     }
 
     private fun setDatasetIntent(dataset: Dataset) {
-        mReplyIntent?.putExtra(EXTRA_AUTHENTICATION_RESULT, dataset)
+        replyIntent?.putExtra(EXTRA_AUTHENTICATION_RESULT, dataset)
     }
 
     companion object {

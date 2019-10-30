@@ -22,12 +22,9 @@
     <package>com.example.android.scopeddirectoryaccess</package>
 
     <minSdk>24</minSdk>
-    <compileSdkVersion>24</compileSdkVersion>
-    <targetSdkVersion>24</targetSdkVersion>
 
     <!-- Include additional dependencies here.-->
-    <dependency>com.android.support:recyclerview-v7:24.0.0</dependency>
-    <dependency>com.android.support:support-v4:24.0.0</dependency>
+    <dependency>com.android.support:recyclerview-v7:28.0.0</dependency>
 
     <template src="base" />
 
@@ -42,7 +39,7 @@ READ_EXTERNAL_STORAGE or WRITE_EXTERNAL_STORAGE in your manifest.
     </strings>
 
     <metadata>
-        <status>PUBLISHED</status>
+        <status>DEPRECATED</status>
         <categories>Content</categories>
         <technologies>Android</technologies>
         <languages>Java</languages>

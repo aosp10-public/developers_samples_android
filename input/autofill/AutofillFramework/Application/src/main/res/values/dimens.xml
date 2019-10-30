@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,4 +24,7 @@
     <dimen name="padding_normal_button">12dp</dimen>
     <dimen name="spacing_large">32dp</dimen>
     <dimen name="a11y_min_touch_target_dimen">48dp</dimen>
+    <dimen name="text_field_width">250sp</dimen>
+    <dimen name="custom_view_height">150dp</dimen>
+    <dimen name="multiple_partitions_height">450dp</dimen>
 </resources>

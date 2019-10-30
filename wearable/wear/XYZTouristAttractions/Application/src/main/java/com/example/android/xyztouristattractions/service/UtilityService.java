@@ -24,10 +24,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import static com.example.android.xyztouristattractions.provider.TouristAttractions.ATTRACTIONS;
+import static com.google.android.gms.location.LocationServices.FusedLocationApi;
+import static com.google.android.gms.location.LocationServices.GeofencingApi;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -58,10 +64,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import static com.example.android.xyztouristattractions.provider.TouristAttractions.ATTRACTIONS;
-import static com.google.android.gms.location.LocationServices.FusedLocationApi;
-import static com.google.android.gms.location.LocationServices.GeofencingApi;
 
 /**
  * A utility IntentService, used for a variety of asynchronous background
@@ -368,7 +370,7 @@ public class UtilityService extends IntentService {
                 .setSmallIcon(R.drawable.ic_stat_maps_pin_drop)
                 .setContentIntent(pendingIntent)
                 .setDeleteIntent(deletePendingIntent)
-                .setColor(getResources().getColor(R.color.colorPrimary, getTheme()))
+                .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
                 .setCategory(Notification.CATEGORY_RECOMMENDATION)
                 .setAutoCancel(true);
 

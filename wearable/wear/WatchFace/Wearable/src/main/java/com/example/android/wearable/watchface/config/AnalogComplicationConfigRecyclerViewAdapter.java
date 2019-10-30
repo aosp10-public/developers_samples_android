@@ -27,8 +27,6 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 import android.support.wearable.complications.ComplicationHelperActivity;
 import android.support.wearable.complications.ComplicationProviderInfo;
 import android.support.wearable.complications.ProviderInfoRetriever;
@@ -44,6 +42,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.android.wearable.watchface.R;
 import com.example.android.wearable.watchface.model.AnalogComplicationConfigData.BackgroundComplicationConfigItem;
@@ -518,24 +519,28 @@ public class AnalogComplicationConfigRecyclerViewAdapter
                 }
 
             } else if (watchFaceComplicationId == mLeftComplicationId) {
-                if (complicationProviderInfo != null) {
-                    mLeftComplication.setImageIcon(complicationProviderInfo.providerIcon);
-                    mLeftComplicationBackground.setVisibility(View.VISIBLE);
-
-                } else {
-                    mLeftComplication.setImageDrawable(mDefaultComplicationDrawable);
-                    mLeftComplicationBackground.setVisibility(View.INVISIBLE);
-                }
+                updateComplicationView(complicationProviderInfo, mLeftComplication,
+                    mLeftComplicationBackground);
 
             } else if (watchFaceComplicationId == mRightComplicationId) {
-                if (complicationProviderInfo != null) {
-                    mRightComplication.setImageIcon(complicationProviderInfo.providerIcon);
-                    mRightComplicationBackground.setVisibility(View.VISIBLE);
+                updateComplicationView(complicationProviderInfo, mRightComplication,
+                    mRightComplicationBackground);
+            }
+        }
 
-                } else {
-                    mRightComplication.setImageDrawable(mDefaultComplicationDrawable);
-                    mRightComplicationBackground.setVisibility(View.INVISIBLE);
-                }
+        private void updateComplicationView(ComplicationProviderInfo complicationProviderInfo,
+            ImageButton button, ImageView background) {
+            if (complicationProviderInfo != null) {
+                button.setImageIcon(complicationProviderInfo.providerIcon);
+                button.setContentDescription(
+                    mContext.getString(R.string.edit_complication,
+                        complicationProviderInfo.appName + " " +
+                            complicationProviderInfo.providerName));
+                background.setVisibility(View.VISIBLE);
+            } else {
+                button.setImageDrawable(mDefaultComplicationDrawable);
+                button.setContentDescription(mContext.getString(R.string.add_complication));
+                background.setVisibility(View.INVISIBLE);
             }
         }
 

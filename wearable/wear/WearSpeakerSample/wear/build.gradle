@@ -18,13 +18,12 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "com.example.android.wearable.speaker"
-        minSdkVersion 22
-        targetSdkVersion 25
+        minSdkVersion 23
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
     }
@@ -37,8 +36,17 @@ android {
 }
 
 dependencies {
-    provided 'com.google.android.wearable:wearable:2.0.3'
-    compile 'com.google.android.support:wearable:2.0.3'
-    compile 'com.google.android.gms:play-services-wearable:10.2.6'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+
+    implementation 'androidx.wear:wear:1.0.0'
+    implementation 'androidx.vectordrawable:vectordrawable-animated:1.0.0'
+    implementation 'androidx.media:media:1.0.1'
+
+    implementation 'androidx.percentlayout:percentlayout:1.0.0'
+
+    implementation 'com.google.android.gms:play-services-wearable:16.0.1'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    compileOnly 'com.google.android.wearable:wearable:2.4.0'
+    implementation 'com.google.android.support:wearable:2.4.0'
 }

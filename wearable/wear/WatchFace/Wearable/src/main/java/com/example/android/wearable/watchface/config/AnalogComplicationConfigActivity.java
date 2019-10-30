@@ -20,8 +20,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.wearable.complications.ComplicationProviderInfo;
 import android.support.wearable.complications.ProviderChooserIntent;
-import android.support.wearable.view.WearableRecyclerView;
 import android.util.Log;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.wear.widget.WearableRecyclerView;
 
 import com.example.android.wearable.watchface.R;
 import com.example.android.wearable.watchface.model.AnalogComplicationConfigData;
@@ -57,7 +59,9 @@ public class AnalogComplicationConfigActivity extends Activity {
                 (WearableRecyclerView) findViewById(R.id.wearable_recycler_view);
 
         // Aligns the first and last items on the list vertically centered on the screen.
-        mWearableRecyclerView.setCenterEdgeItems(true);
+        mWearableRecyclerView.setEdgeItemsCenteringEnabled(true);
+
+        mWearableRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Improves performance because we know changes in content do not change the layout size of
         // the RecyclerView.

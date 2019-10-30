@@ -19,12 +19,18 @@
     <group>Wearable</group>
     <package>com.example.android.wearable.wear.alwayson</package>
 
-    <targetSdkVersionWear>25</targetSdkVersionWear>
+    <multiDexEnabled>true</multiDexEnabled>
+
+    <androidX>true</androidX>
+
+    <dependency_wearable>androidx.wear:wear:1.0.0</dependency_wearable>
+
+    <dependency_wearable>androidx.legacy:legacy-support-v13:1.0.0</dependency_wearable>
 
     <strings>
         <intro>
             <![CDATA[
-            Demonstrates a native Android Wear app using ambient screen support.
+            Demonstrates a native Wear app using ambient screen support.
             ]]>>
         </intro>
     </strings>
@@ -53,7 +59,7 @@
         </api_refs>
         <description>
             <![CDATA[
-A basic sample showing how to support ambient mode for native Android Wear apps.
+A basic sample showing how to support ambient mode for native Wear apps.
 ]]>
         </description>
 

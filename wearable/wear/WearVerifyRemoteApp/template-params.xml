@@ -23,23 +23,30 @@
     <!-- change minSdk if needed-->
     <minSdk>23</minSdk>
     <minSdkVersionWear>23</minSdkVersionWear>
-    <targetSdkVersion>25</targetSdkVersion>
-    <targetSdkVersionWear>25</targetSdkVersionWear>
+    <targetSdkVersion>28</targetSdkVersion>
+    <targetSdkVersionWear>28</targetSdkVersionWear>
 
     <wearable>
         <has_handheld_app>true</has_handheld_app>
     </wearable>
 
-    <dependency>com.google.android.support:wearable:2.0.3</dependency>
 
-    <!-- Include additional dependencies here.-->
-    <!-- dependency>com.google.android.gms:play-services:5.0.+</dependency -->
+    <androidX>true</androidX>
+
+    <dependency>androidx.legacy:legacy-support-v4:1.0.0</dependency>
+    <dependency>androidx.legacy:legacy-support-v13:1.0.0</dependency>
+    <dependency>androidx.cardview:cardview:1.0.0</dependency>
+    <dependency>androidx.appcompat:appcompat:1.0.2</dependency>
+    <dependency>com.google.android.support:wearable:2.4.0</dependency>
+
+    <dependency_wearable>androidx.wear:wear:1.0.0</dependency_wearable>
+    <dependency_wearable>androidx.legacy:legacy-support-v13:1.0.0</dependency_wearable>
 
     <strings>
         <intro>
 <![CDATA[
 Sample demonstrates best practices for checking if the remote version of your app is installed on a
-connected device. This enables standalone Android Wear apps to check if the phone app is installed
+connected device. This enables standalone Wear apps to check if the phone app is installed
 and the other way around.
 ]]>
         </intro>
@@ -94,7 +101,7 @@ and the other way around.
         <description>
 <![CDATA[
 Sample demonstrates best practices for checking if connected mobile device has your app installed
-from an Android Wear 2.+ standalone app and the other way around.
+from a Wear 2.+ standalone app and the other way around.
 ]]>
         </description>
 
